@@ -2,13 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"sync"
 	"time"
 
-	"github.com/alexedwards/scs"
 	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/gomodule/redigo/redis"
@@ -47,6 +47,20 @@ func main() {
 	// set up mail
 
 	// listen for wen connections
+	app.serve()
+}
+
+func (app *Config) serve() {
+	//strat http sever
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: app.routes(),
+	}
+	app.InfoLog.Println("Starting web server....")
+	err := srv.ListenAndServe()
+	if err != nil {
+		log.Panic(err)
+	}
 }
 
 func initDB() *sql.DB {
@@ -100,7 +114,7 @@ func initsession() *scs.SessionManager {
 	session := scs.New()
 	session.Store = redisstore.New(initRedis())
 	session.Lifetime = 24 * time.Hour
-	session.Cookie.Presist = true
+	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = true
 
