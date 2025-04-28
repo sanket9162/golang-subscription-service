@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/alexedwards/scs"
@@ -26,12 +27,23 @@ func main() {
 	// create sessions
 	session := initsession()
 
+	// create loggers
+	infoLog := log.New(os.Stdout, "NOFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	//create channels
 
 	// create waitgroup
+	wg := sync.WaitGroup{}
 
 	// set up the application config
-
+	app := Config{
+		Session:  session,
+		DB:       db,
+		InfoLog:  infoLog,
+		ErrorLog: errorLog,
+		Wait:     &wg,
+	}
 	// set up mail
 
 	// listen for wen connections
