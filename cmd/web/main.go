@@ -17,7 +17,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-const webPort = "90"
+const webPort = "8080"
 
 func main() {
 	// connect to the database
