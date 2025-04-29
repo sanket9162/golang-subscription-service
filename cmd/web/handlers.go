@@ -19,42 +19,42 @@ func (app *Config) PostLoginPage(w http.ResponseWriter, r *http.Request) {
 		app.ErrorLog.Println(err)
 	}
 
+	// get email and password from form post
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
 	user, err := app.Models.User.GetByEmail(email)
 	if err != nil {
-		app.Session.Put(r.Context(), "error", "Invaild credentials.")
+		app.Session.Put(r.Context(), "error", "Invalid credentials.")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
 	// check password
-	vaildPassword, err := user.PasswordMatches(password)
+	validPassword, err := user.PasswordMatches(password)
 	if err != nil {
-		app.Session.Put(r.Context(), "error", "Invaild credentials.")
+		app.Session.Put(r.Context(), "error", "Invalid credentials.")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	if !vaildPassword {
-		app.Session.Put(r.Context(), "error", "Invaild credentials.")
+	if !validPassword{
+		app.Session.Put(r.Context(), "error", "Invalid credentials.")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	//okay, so log user in
+	// okay, so log user in
 	app.Session.Put(r.Context(), "userID", user.ID)
 	app.Session.Put(r.Context(), "user", user)
 
 	app.Session.Put(r.Context(), "flash", "Successful login!")
 
-	//redirect the user
+	// redirect the user
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-
 }
 
-func (app *Config) LogOut(w http.ResponseWriter, r *http.Request) {
+func (app *Config) Logout(w http.ResponseWriter, r *http.Request) {
 	// clean up session
 	_ = app.Session.Destroy(r.Context())
 	_ = app.Session.RenewToken(r.Context())
@@ -67,16 +67,15 @@ func (app *Config) RegisterPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
-	//create a user
+	// create a user
 
 	// send an activation email
 
 	// subscbribe the user to an account
-
 }
 
 func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
-	// validate url
+	// validate url 
 
 	// generate an invoice
 

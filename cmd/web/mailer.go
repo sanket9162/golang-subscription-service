@@ -21,9 +21,9 @@ type Mail struct {
 	FromAddress string
 	FromName    string
 	Wait        *sync.WaitGroup
-	MailerCahn  chan Message
-	Error       chan error
-	Done        chan bool
+	MailerChan  chan Message
+	ErrorChan   chan error
+	DoneChan    chan bool
 }
 
 type Message struct {
@@ -37,7 +37,7 @@ type Message struct {
 	Template    string
 }
 
-// a function to listen for message on the MailerChan
+// a function to listen for messages on the MailerChan
 
 func (m *Mail) sendMail(msg Message, errorChan chan error) {
 	if msg.Template == "" {
@@ -58,14 +58,14 @@ func (m *Mail) sendMail(msg Message, errorChan chan error) {
 
 	msg.DataMap = data
 
-	//build html mail
+	// build html mail
 	formattedMessage, err := m.buildHTMLMessage(msg)
 	if err != nil {
 		errorChan <- err
 	}
 
 	// build plain text mail
-	plainMessage, err := m.buildHTMLMessage(msg)
+	plainMessage, err := m.buildPlainTextMessage(msg)
 	if err != nil {
 		errorChan <- err
 	}
@@ -101,7 +101,6 @@ func (m *Mail) sendMail(msg Message, errorChan chan error) {
 	if err != nil {
 		errorChan <- err
 	}
-
 }
 
 func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
@@ -118,7 +117,7 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 	}
 
 	formattedMessage := tpl.String()
-	formattedMessage, err = m.inlineCss(formattedMessage)
+	formattedMessage, err = m.inlineCSS(formattedMessage)
 	if err != nil {
 		return "", err
 	}
@@ -126,7 +125,7 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 	return formattedMessage, nil
 }
 
-func (m *Mail) buildPlainMessage(msg Message) (string, error) {
+func (m *Mail) buildPlainTextMessage(msg Message) (string, error) {
 	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.plain.gohtml", msg.Template)
 
 	t, err := template.New("email-plain").ParseFiles(templateToRender)
@@ -144,10 +143,10 @@ func (m *Mail) buildPlainMessage(msg Message) (string, error) {
 	return plainMessage, nil
 }
 
-func (m *Mail) inlineCss(s string) (string, error) {
+func (m *Mail) inlineCSS(s string) (string, error) {
 	options := premailer.Options{
-		RemoveClasses:     false,
-		CssToAttributes:   false,
+		RemoveClasses: false,
+		CssToAttributes: false,
 		KeepBangImportant: true,
 	}
 
@@ -155,11 +154,12 @@ func (m *Mail) inlineCss(s string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	html, err := prem.Transform()
 	if err != nil {
 		return "", err
-
 	}
+
 	return html, nil
 }
 
